@@ -55,3 +55,12 @@ models/*.joblib
 # OS
 .DS_Store
 Thumbs.db
+
+# Large data files - exclude from git
+data/*.pkl
+data/*.csv
+models/saved_models/*.pkl
+
+# Keep directory structure
+!models/saved_models/.gitkeep
+!data/.gitkeep
