@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation System - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #E50914;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+        
+        .step-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .movie-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .movie-card.rated {
+            opacity: 0.6;
+            background: #e9ecef;
+        }
+        
+        .movie-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .movie-genre {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .rating-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .star-rating {
+            font-size: 2rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .star {
+            color: #ddd;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        
+        .star.active {
+            color: #ffd700;
+        }
+        
+        .star:hover {
+            color: #ffed4e;
+        }
+        
+        .rating-display {
+            font-size: 1rem;
+            color: #667eea;
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        .get-recs-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: transform 0.2s;
+            display: block;
+            margin: 30px auto;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .get-recs-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .get-recs-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .recommendations {
+            margin-top: 40px;
+        }
+        
+        .rec-header {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .llm-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .progress-indicator {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Movie Recommendation System</h1>
+        <p class="subtitle">Discover movies you'll love • AI-Powered Recommendations</p>
+        
+        <div id="step-1" class="step">
+            <div class="step-badge">Step 1: Rate Movies</div>
+            <p style="margin-bottom: 20px;">Click on the stars to rate each movie (1-5 stars):</p>
+            
+            <div id="loading-movies" class="loading">Loading movies... 🎬</div>
+            <div id="initial-movies"></div>
+            
+            <div id="progress" class="progress-indicator hidden">
+                📊 You've rated <span id="rated-count">0</span> out of 5 movies. 
+                <span id="progress-message">Rate at least 3 movies to get recommendations!</span>
+            </div>
+            
+            <button id="get-recommendations-btn" class="get-recs-btn hidden" disabled>
+                🎯 Get My Recommendations
+            </button>
+        </div>
+        
+        <div id="step-2" class="step hidden">
+            <div class="step-badge">Step 2: Your Personalized Recommendations</div>
+            
+            <div id="llm-message-1" class="llm-message hidden"></div>
+            
+            <p class="rec-header">🎬 Based on your ratings, we recommend:</p>
+            
+            <div id="loading-recs" class="loading hidden">Getting recommendations... 🤖</div>
+            <div id="recommendations"></div>
+        </div>
+        
+        <div id="stats" class="stats hidden">
+            <div class="stat-card">
+                <div class="stat-value" id="total-ratings">0</div>
+                <div class="stat-label">Movies Rated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avg-rating">0</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="recommendations-count">0</div>
+                <div class="stat-label">Recommendations</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ================================================================
+        // CONFIGURATION
+        // ================================================================
+        const API_BASE_URL = '/proxy/8000';
+        const API_TIMEOUT = 10000; // 10 seconds timeout
+        
+        // ================================================================
+        // STATE MANAGEMENT
+        // ================================================================
+        let ratings = {}; // Store all ratings: {movieId: rating}
+        let initialMovies = [];
+        let recommendedMovies = [];
+        
+        // ================================================================
+        // UTILITY FUNCTIONS
+        // ================================================================
+        
+        /**
+         * Fetch with timeout support
+         */
+        async function fetchWithTimeout(url, options = {}, timeout = API_TIMEOUT) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout - please check your connection');
+                }
+                throw error;
+            }
+        }
+        
+        /**
+         * Check API health before proceeding
+         */
+        async function checkAPIHealth() {
+            try {
+                const response = await fetchWithTimeout(`${API_BASE_URL}/health`);
+                if (!response.ok) return false;
+                const data = await response.json();
+                return data.model_loaded === true;
+            } catch (error) {
+                console.error('Health check failed:', error);
+                return false;
+            }
+        }
+        
+        // ================================================================
+        // GLOBAL RATING FUNCTION (Must be declared globally for onclick)
+        // ================================================================
+        window.setRating = function(movieId, rating) {
+            console.log(`Rating movie ${movieId} with ${rating} stars`);
+            
+            // Validate rating
+            if (rating < 1 || rating > 5) {
+                console.error('Invalid rating:', rating);
+                return;
+            }
+            
+            // Store the rating
+            ratings[movieId] = rating;
+            console.log('Current ratings:', ratings);
+            
+            // Update the stars display
+            const starsContainer = document.getElementById(`stars-${movieId}`);
+            if (!starsContainer) {
+                console.error(`Stars container not found for movie ${movieId}`);
+                return;
+            }
+            
+            const stars = starsContainer.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            // Update the display text
+            const displayEl = document.getElementById(`display-${movieId}`);
+            if (displayEl) {
+                displayEl.textContent = `${rating} ⭐`;
+            }
+            
+            // Mark card as rated
+            const cardEl = document.getElementById(`card-${movieId}`);
+            if (cardEl) {
+                cardEl.classList.add('rated');
+            }
+            
+            // Update progress
+            updateProgress();
+            updateStats();
+        };
+        
+        // ================================================================
+        // API FUNCTIONS
+        // ================================================================
+        
+        async function fetchMovies() {
+            try {
+                const response = await fetchWithTimeout(`${API_BASE_URL}/api/movies?limit=5`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Fetched movies:', data.movies);
+                
+                // Validate data structure
+                if (!data.movies || !Array.isArray(data.movies)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                // Validate each movie has required properties
+                const validMovies = data.movies.filter(m => {
+                    const isValid = m.id && m.title && m.genres;
+                    if (!isValid) {
+                        console.warn('Invalid movie data:', m);
+                    }
+                    return isValid;
+                });
+                
+                return validMovies;
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+                showError(`Could not load movies: ${error.message}. Make sure the API server is running!`);
+                return [];
+            }
+        }
+        
+        async function getRecommendations(userRatings, numRecs = 10) {
+            try {
+                // Validate ratings before sending
+                for (const [movieId, rating] of Object.entries(userRatings)) {
+                    if (rating < 0.5 || rating > 5.0) {
+                        throw new Error(`Invalid rating value: ${rating}`);
+                    }
+                }
+                
+                const response = await fetchWithTimeout(`${API_BASE_URL}/api/recommendations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ratings: userRatings,
+                        num_recommendations: numRecs
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error getting recommendations:', error);
+                showError(`Could not get recommendations: ${error.message}`);
+                return { movies: [], message: null };
+            }
+        }
+        
+        // ================================================================
+        // UI FUNCTIONS
+        // ================================================================
+        
+        function createMovieCard(movie, isRecommendation = false) {
+            // Validate movie object
+            if (!movie || !movie.id || !movie.title || !movie.genres) {
+                console.error('Invalid movie object:', movie);
+                return '';
+            }
+            
+            const scoreDisplay = isRecommendation && movie.score 
+                ? ` • Match Score: ${movie.score.toFixed(2)}` 
+                : '';
+            
+            return `
+                <div class="movie-card" data-movie-id="${movie.id}" id="card-${movie.id}">
+                    <div class="movie-title">${escapeHtml(movie.title)}</div>
+                    <div class="movie-genre">${escapeHtml(movie.genres)}${scoreDisplay}</div>
+                    <div class="rating-container">
+                        <div class="star-rating" id="stars-${movie.id}">
+                            ${[1,2,3,4,5].map(i => 
+                                `<span class="star" data-movie="${movie.id}" data-rating="${i}" onclick="setRating(${movie.id}, ${i})">★</span>`
+                            ).join('')}
+                        </div>
+                        <div class="rating-display" id="display-${movie.id}">Not rated</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function updateProgress() {
+            const ratedCount = Object.keys(ratings).length;
+            
+            document.getElementById('rated-count').textContent = ratedCount;
+            document.getElementById('progress').classList.remove('hidden');
+            
+            const btn = document.getElementById('get-recommendations-btn');
+            
+            if (ratedCount >= 3) {
+                btn.classList.remove('hidden');
+                btn.disabled = false;
+                document.getElementById('progress-message').textContent = 
+                    '✅ Ready! Click the button below to get recommendations.';
+            } else {
+                document.getElementById('progress-message').textContent = 
+                    `Rate ${3 - ratedCount} more movie${3 - ratedCount !== 1 ? 's' : ''} to get recommendations!`;
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = `⚠️ ${message}`;
+            
+            const container = document.querySelector('.container');
+            const existingError = container.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            setTimeout(() => errorDiv.remove(), 8000);
+        }
+        
+        function updateStats() {
+            const ratingValues = Object.values(ratings);
+            const count = ratingValues.length;
+            const avg = count > 0 ? (ratingValues.reduce((a,b) => a+b, 0) / count).toFixed(1) : 0;
+            
+            document.getElementById('total-ratings').textContent = count;
+            document.getElementById('avg-rating').textContent = avg + '⭐';
+            
+            if (count > 0) {
+                document.getElementById('stats').classList.remove('hidden');
+            }
+        }
+        
+        // ================================================================
+        // RECOMMENDATIONS FLOW
+        // ================================================================
+        
+        async function showRecommendations() {
+            if (Object.keys(ratings).length < 3) {
+                showError('Please rate at least 3 movies before getting recommendations!');
+                return;
+            }
+            
+            // Hide step 1, show step 2
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+            document.getElementById('loading-recs').classList.remove('hidden');
+            
+            // Get recommendations from API
+            const data = await getRecommendations(ratings, 10);
+            
+            document.getElementById('loading-recs').classList.add('hidden');
+            
+            if (!data.movies || data.movies.length === 0) {
+                document.getElementById('recommendations').innerHTML = 
+                    '<p class="error-message">No recommendations available. Try rating more diverse movies!</p>';
+                return;
+            }
+            
+            recommendedMovies = data.movies;
+            
+            // Show LLM message if available
+            if (data.message) {
+                const msgDiv = document.getElementById('llm-message-1');
+                msgDiv.textContent = data.message;
+                msgDiv.classList.remove('hidden');
+            }
+            
+            // Display recommendations
+            const recHtml = recommendedMovies.map(m => createMovieCard(m, true)).join('');
+            document.getElementById('recommendations').innerHTML = recHtml;
+            
+            // Update stats
+            document.getElementById('recommendations-count').textContent = recommendedMovies.length;
+        }
+        
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        
+        async function init() {
+            console.log('🎬 Initializing Movie Recommendation System...');
+            
+            // Check API health first
+            console.log('Checking API health...');
+            const isHealthy = await checkAPIHealth();
+            
+            if (!isHealthy) {
+                document.getElementById('loading-movies').classList.add('hidden');
+                document.getElementById('initial-movies').innerHTML = 
+                    '<p class="error-message">⚠️ API is not ready. Model may not be loaded. Check server logs!</p>';
+                return;
+            }
+            
+            console.log('✅ API health check passed');
+            
+            // Fetch initial movies from API
+            initialMovies = await fetchMovies();
+            
+            document.getElementById('loading-movies').classList.add('hidden');
+            
+            if (initialMovies.length === 0) {
+                document.getElementById('initial-movies').innerHTML = 
+                    '<p class="error-message">⚠️ Could not load movies. Make sure the FastAPI server is running!</p>';
+                return;
+            }
+            
+            // Display initial movies
+            const moviesHtml = initialMovies.map(m => createMovieCard(m)).join('');
+            document.getElementById('initial-movies').innerHTML = moviesHtml;
+            
+            // Setup button click handler
+            document.getElementById('get-recommendations-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('get-recommendations-btn');
+                btn.disabled = true;
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Getting recommendations...';
+                
+                try {
+                    await showRecommendations();
+                } catch (error) {
+                    console.error('Error in recommendations flow:', error);
+                    showError('Failed to get recommendations. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            });
+            
+            console.log('✅ System initialized successfully!');
+        }
+        
+        // Start the app when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
