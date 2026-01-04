@@ -458,6 +458,9 @@ response = client.chat.completions.create(
 ![Landing_Page](App_ScreenShots/home_page.png)
 ![Initial_Ratings](App_ScreenShots/page_1.png)
 ![Recommendations](App_ScreenShots/page_2.png)
+![Refine](App_ScreenShots/page_3.png)
+![Updated_Recommendations](App_ScreenShots/page_4.png)
+
 
 
 
