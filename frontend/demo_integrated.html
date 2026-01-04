@@ -84,6 +84,17 @@
             margin-bottom: 15px;
         }
         
+        .movie-pitch {
+            background: #e3f2fd;
+            border-left: 3px solid #2196f3;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-style: italic;
+            color: #1565c0;
+            font-size: 0.95rem;
+        }
+        
         .rating-container {
             display: flex;
             align-items: center;
@@ -468,10 +479,15 @@
                 ? ` • Match Score: ${movie.score.toFixed(2)}` 
                 : '';
             
+            const pitchHtml = isRecommendation && movie.pitch 
+                ? `<div class="movie-pitch">💡 ${escapeHtml(movie.pitch)}</div>` 
+                : '';
+            
             return `
                 <div class="movie-card" data-movie-id="${movie.id}" id="card-${movie.id}">
                     <div class="movie-title">${escapeHtml(movie.title)}</div>
                     <div class="movie-genre">${escapeHtml(movie.genres)}${scoreDisplay}</div>
+                    ${pitchHtml}
                     <div class="rating-container">
                         <div class="star-rating" id="stars-${movie.id}">
                             ${[1,2,3,4,5].map(i => 

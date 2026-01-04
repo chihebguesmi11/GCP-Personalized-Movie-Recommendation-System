@@ -154,11 +154,11 @@ class MovieRecommenderAPI:
         return recommendations[['movieId', 'title', 'genres', 'score']]
     
     def get_all_movies(self, limit: int = 100):
-        """Get a sample of movies for initial display"""
-        # Return with consistent 'id' property name for frontend
-        movies = self.movies_df.head(limit)[['movieId', 'title', 'genres']].to_dict('records')
+        """Get a sample of movies for initial display - shuffled randomly"""
+        # Sample randomly instead of taking the first N movies
+        sampled_movies = self.movies_df.sample(n=min(limit, len(self.movies_df)))[['movieId', 'title', 'genres']].to_dict('records')
         # Rename movieId to id for frontend consistency
-        return [{'id': m['movieId'], 'title': m['title'], 'genres': m['genres']} for m in movies]
+        return [{'id': m['movieId'], 'title': m['title'], 'genres': m['genres']} for m in sampled_movies]
     
     def get_movie_info(self, movie_id: int):
         """Get information about a specific movie"""
@@ -178,7 +178,13 @@ class CinephileAssistant:
     """Optional LLM wrapper for conversational recommendations"""
     
     def __init__(self, groq_api_key: str):
-        self.client = Groq(api_key=groq_api_key)
+        # Initialize Groq client with minimal parameters to avoid version issues
+        try:
+            self.client = Groq(api_key=groq_api_key)
+        except TypeError:
+            # Fallback for older Groq versions
+            from groq import Client as GroqClient
+            self.client = GroqClient(api_key=groq_api_key)
         self.model = "llama-3.3-70b-versatile"
         
         self.system_prompt = """You are a passionate movie recommendation assistant!
@@ -219,6 +225,28 @@ Write a brief, enthusiastic message (2-3 sentences) introducing these recommenda
         except Exception as e:
             logger.error(f"Error generating LLM message: {e}")
             return "Here are your personalized recommendations!"
+    
+    def generate_movie_pitch(self, movie_title: str, movie_genres: str, match_score: float):
+        """Generate a short personalized pitch for a specific movie"""
+        try:
+            prompt = f"""The movie "{movie_title}" ({movie_genres}) has a match score of {match_score:.2f} for this user.
+
+Write a super brief, exciting 1-2 sentence pitch that "sells" this movie to them. Be enthusiastic and highlight what makes it appealing based on the genres. Keep it under 30 words."""
+
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a movie enthusiast who writes brief, exciting movie pitches. Keep it under 30 words, use 1 emoji max."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.8,
+                max_tokens=80
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"Error generating movie pitch: {e}")
+            return None
 
 # ============================================================================
 # GLOBAL INSTANCES
@@ -370,15 +398,29 @@ async def get_recommendations(request: RecommendationRequest):
         }
     
     # Convert to list of dicts with consistent 'id' property
-    recommendations = [
-        {
+    recommendations = []
+    for _, row in recommendations_df.iterrows():
+        movie_rec = {
             "id": int(row['movieId']),
             "title": row['title'],
             "genres": row['genres'],
             "score": float(row['score'])
         }
-        for _, row in recommendations_df.iterrows()
-    ]
+        
+        # Generate LLM pitch for each movie if assistant is available
+        if assistant:
+            try:
+                logger.info(f"Generating pitch for: {row['title']}")
+                pitch = assistant.generate_movie_pitch(row['title'], row['genres'], row['score'])
+                if pitch:
+                    movie_rec['pitch'] = pitch
+                    logger.info(f"Pitch generated: {pitch[:50]}...")
+            except Exception as e:
+                logger.error(f"Error generating pitch for {row['title']}: {e}")
+        
+        recommendations.append(movie_rec)
+    
+    logger.info(f"Generated {len([r for r in recommendations if 'pitch' in r])} pitches out of {len(recommendations)} movies")
     
     # Optional: Generate LLM message
     message = None
