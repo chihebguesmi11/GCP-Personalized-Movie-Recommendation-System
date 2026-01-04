@@ -762,7 +762,7 @@ Rated Highly:
 - **Ramy Lazghab** ([@Rblaze23](https://github.com/Rblaze23))
 
 **Project**: Master AI - Cloud Computing Course  
-**Institution**: [Your Institution Name]  
+**Institution**:Dauphine  
 **Academic Year**: 2024-2025
 
 ---
