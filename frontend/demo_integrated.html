@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Recommendation System - Demo</title>
+    <title>Movie Recommendation System - AI Powered</title>
     <style>
         * {
             margin: 0;
@@ -13,9 +13,195 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* ============================================
+           LANDING PAGE STYLES
+           ============================================ */
+        
+        #landing-page {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+            padding: 40px;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f, #c44569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.8rem;
+            margin-bottom: 40px;
+            color: #ddd;
+            animation: fadeIn 1.5s ease-out;
+        }
+        
+        .start-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s ease;
+            animation: pulse 2s ease-in-out infinite;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.7);
+        }
+        
+        /* Animated Background Elements */
+        .film-strip {
+            position: absolute;
+            width: 100%;
+            height: 200px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(255,255,255,0.03) 0px,
+                rgba(255,255,255,0.03) 40px,
+                transparent 40px,
+                transparent 80px
+            );
+            animation: scrollFilm 20s linear infinite;
+        }
+        
+        .film-strip:nth-child(1) { top: 10%; opacity: 0.3; }
+        .film-strip:nth-child(2) { top: 50%; opacity: 0.2; animation-duration: 25s; }
+        .film-strip:nth-child(3) { bottom: 10%; opacity: 0.3; animation-direction: reverse; }
+        
+        /* Floating Movie Icons */
+        .floating-icon {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-icon:nth-child(4) { top: 15%; left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(5) { top: 25%; right: 15%; animation-delay: 1s; }
+        .floating-icon:nth-child(6) { bottom: 20%; left: 20%; animation-delay: 2s; }
+        .floating-icon:nth-child(7) { bottom: 30%; right: 10%; animation-delay: 3s; }
+        
+        /* Movie Carousel */
+        .movie-carousel {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            display: flex;
+            gap: 30px;
+            animation: carousel 30s linear infinite;
+            opacity: 0.2;
+        }
+        
+        .movie-poster {
+            min-width: 100px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 107, 107, 0.3); }
+            to { text-shadow: 0 0 40px rgba(255, 107, 107, 0.6); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes scrollFilm {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        @keyframes carousel {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        
+        /* Transition Effect */
+        .fade-out {
+            animation: fadeOut 0.8s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+        
+        /* ============================================
+           APP CONTAINER STYLES
+           ============================================ */
+        
+        #app-container {
+            display: none;
+            animation: fadeIn 0.8s ease-out;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+        }
+        
+        #app-container.active {
+            display: block;
         }
         
         .container {
@@ -242,55 +428,122 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 Movie Recommendation System</h1>
-        <p class="subtitle">Discover movies you'll love • AI-Powered Recommendations</p>
+    <!-- ========================================
+         LANDING PAGE
+         ======================================== -->
+    <div id="landing-page">
+        <!-- Animated Background Elements -->
+        <div class="film-strip"></div>
+        <div class="film-strip"></div>
+        <div class="film-strip"></div>
         
-        <div id="step-1" class="step">
-            <div class="step-badge">Step 1: Rate Movies</div>
-            <p style="margin-bottom: 20px;">Click on the stars to rate each movie (1-5 stars):</p>
-            
-            <div id="loading-movies" class="loading">Loading movies... 🎬</div>
-            <div id="initial-movies"></div>
-            
-            <div id="progress" class="progress-indicator hidden">
-                📊 You've rated <span id="rated-count">0</span> out of 5 movies. 
-                <span id="progress-message">Rate at least 3 movies to get recommendations!</span>
-            </div>
-            
-            <button id="get-recommendations-btn" class="get-recs-btn hidden" disabled>
-                🎯 Get My Recommendations
+        <!-- Floating Movie Icons -->
+        <div class="floating-icon">🎬</div>
+        <div class="floating-icon">🍿</div>
+        <div class="floating-icon">🎭</div>
+        <div class="floating-icon">🎥</div>
+        
+        <!-- Movie Carousel -->
+        <div class="movie-carousel">
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+            <div class="movie-poster"></div>
+        </div>
+        
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <h1 class="hero-title">🎬 CineMatch AI</h1>
+            <p class="hero-subtitle">Discover Your Next Favorite Movie</p>
+            <p style="color: #aaa; margin-bottom: 40px; font-size: 1.1rem;">
+                Powered by Machine Learning & AI • Personalized Just For You
+            </p>
+            <button class="start-button" onclick="startApp()">
+                ✨ Start Discovering
             </button>
         </div>
-        
-        <div id="step-2" class="step hidden">
-            <div class="step-badge">Step 2: Your Personalized Recommendations</div>
+    </div>
+    
+    <!-- ========================================
+         MAIN APP CONTAINER
+         ======================================== -->
+    <div id="app-container">
+        <div class="container">
+            <h1>🎬 Movie Recommendation System</h1>
+            <p class="subtitle">Discover movies you'll love • AI-Powered Recommendations</p>
             
-            <div id="llm-message-1" class="llm-message hidden"></div>
-            
-            <p class="rec-header">🎬 Based on your ratings, we recommend:</p>
-            
-            <div id="loading-recs" class="loading hidden">Getting recommendations... 🤖</div>
-            <div id="recommendations"></div>
-        </div>
-        
-        <div id="stats" class="stats hidden">
-            <div class="stat-card">
-                <div class="stat-value" id="total-ratings">0</div>
-                <div class="stat-label">Movies Rated</div>
+            <div id="step-1" class="step">
+                <div class="step-badge">Step 1: Rate Movies</div>
+                <p style="margin-bottom: 20px;">Click on the stars to rate each movie (1-5 stars):</p>
+                
+                <div id="loading-movies" class="loading">Loading movies... 🎬</div>
+                <div id="initial-movies"></div>
+                
+                <div id="progress" class="progress-indicator hidden">
+                    📊 You've rated <span id="rated-count">0</span> out of 5 movies. 
+                    <span id="progress-message">Rate at least 3 movies to get recommendations!</span>
+                </div>
+                
+                <button id="get-recommendations-btn" class="get-recs-btn hidden" disabled>
+                    🎯 Get My Recommendations
+                </button>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="avg-rating">0</div>
-                <div class="stat-label">Average Rating</div>
+            
+            <div id="step-2" class="step hidden">
+                <div class="step-badge">Step 2: Your Personalized Recommendations</div>
+                
+                <div id="llm-message-1" class="llm-message hidden"></div>
+                
+                <p class="rec-header">🎬 Based on your ratings, we recommend:</p>
+                
+                <div id="loading-recs" class="loading hidden">Getting recommendations... 🤖</div>
+                <div id="recommendations"></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="recommendations-count">0</div>
-                <div class="stat-label">Recommendations</div>
+            
+            <div id="stats" class="stats hidden">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-ratings">0</div>
+                    <div class="stat-label">Movies Rated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-rating">0</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="recommendations-count">0</div>
+                    <div class="stat-label">Recommendations</div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
+        // ================================================================
+        // LANDING PAGE FUNCTIONS
+        // ================================================================
+        
+        function startApp() {
+            const landing = document.getElementById('landing-page');
+            const app = document.getElementById('app-container');
+            
+            // Fade out landing page
+            landing.classList.add('fade-out');
+            
+            // After animation, hide landing and show app
+            setTimeout(() => {
+                landing.style.display = 'none';
+                app.classList.add('active');
+                // Initialize the app
+                init();
+            }, 800);
+        }
+        
         // ================================================================
         // CONFIGURATION
         // ================================================================
@@ -303,6 +556,7 @@
         let ratings = {}; // Store all ratings: {movieId: rating}
         let initialMovies = [];
         let recommendedMovies = [];
+        let isInitialized = false;
         
         // ================================================================
         // UTILITY FUNCTIONS
@@ -602,6 +856,10 @@
         // ================================================================
         
         async function init() {
+            // Prevent multiple initializations
+            if (isInitialized) return;
+            isInitialized = true;
+            
             console.log('🎬 Initializing Movie Recommendation System...');
             
             // Check API health first
@@ -650,13 +908,6 @@
             });
             
             console.log('✅ System initialized successfully!');
-        }
-        
-        // Start the app when page loads
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
         }
     </script>
 </body>
