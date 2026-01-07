@@ -57,7 +57,7 @@ This project demonstrates a **production-ready movie recommendation system** bui
    - Feature engineering
    - Model training and evaluation
 
-3. **Model Storage**: Cloud Storage (optional) / Local pickle files
+3. **Model Storage**: Local pickle files
    - Trained model components (user-item matrix, similarity matrix)
    - Model size: ~860 MB
 
